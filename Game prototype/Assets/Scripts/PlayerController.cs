@@ -1,79 +1,28 @@
 using UnityEngine;
-using TMPro; //libreria para usar textos
 
-public class PlayerController : MonoBehaviour
+[RequireComponent(typeof(Rigidbody2D))]
+public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 5f; //variable para guardar la velocidad
-    public int score = 0;
-    public bool hasKey = false;
-    public bool hasWater = false;
-    public TextMeshProUGUI textScore;
+    public float moveSpeed = 5f; // velocidad de movimiento
 
+    private Rigidbody2D rb;
+    private Vector2 movement;
 
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        UpdateTextScore();
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        //leer las teclas WASD o las flechas
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
-
-        //creamos un vector para direccion del movimiento
-        Vector3 direction = new Vector3(moveHorizontal, moveVertical, 0);
-
-        transform.Translate(direction * speed * Time.deltaTime);
-
+        // Leer entrada (WASD o flechas)
+        movement.x = Input.GetAxisRaw("Horizontal"); // -1, 0, 1
+        movement.y = Input.GetAxisRaw("Vertical");   // -1, 0, 1
     }
 
-    //función especial que se ejecuta cuando se toca a otro objeto que tiene un collider en modo
-    //trigger
-    private void OnTriggerEnter2D(Collider2D other)
+    private void FixedUpdate()
     {
-        if (other.CompareTag("Collectable"))
-        {
-            score = score + 1;
-            UpdateTextScore();
-
-            Destroy(other.gameObject);
-            Debug.Log("Collected!!!");
-            Debug.Log("Score: " + score);
-
-
-        }
-        if (other.CompareTag("Key"))
-        {
-            hasKey = true;
-            Debug.Log("has recolectado la llave!");
-            Destroy(other.gameObject);
-        }
-        if (other.CompareTag("Water"))
-        {
-            hasWater = true;
-            Debug.Log("has tocado el agua y no puedes ganar!");
-            Destroy(gameObject);
-        }
-
-        //condicion de victoria
-        if (score >= 3 && hasKey && !hasWater)
-        {
-            Debug.Log("Has ganado, Tienes suficientes puntos y la llave!");
-        }
-
-
+        // Aplicar movimiento en físicas
+        rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
     }
-
-    void UpdateTextScore()
-    {
-        textScore.text = "Score: " + score;
-    }
-
-    
-
 }
